@@ -113,7 +113,7 @@ export class Readline extends EventEmitter {
         });
     }
 
-    public onLine(callback: (line: string) => void): void {
+    public onLine(callback: (line: string) => Promise<void>): void {
         this.on('line', callback);
     }
 
