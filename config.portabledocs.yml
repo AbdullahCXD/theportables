@@ -1,0 +1,11 @@
+version:
+  doc: "Configuration version for Portables"
+  readonly: true
+
+settings:
+  doc: "Settings for Portables"
+  workspaceDirectory: 
+    doc: "Workspace directory for Portables"
+  debugging:
+    doc: "Debugging mode for Portables"
+
