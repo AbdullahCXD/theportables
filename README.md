@@ -229,3 +229,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Built with [minecraft-protocol](https://github.com/PrismarineJS/node-minecraft-protocol)
 - Inspired by Minecraft server development tools 
+
+## 💝 Donation
+
+If you want to support the development of this project, you can donate to me on [Buy Me a Coffee](https://www.buymeacoffee.com/abdullahcxd) or [Ko-Fi](https://ko-fi.com/abdullahcxd).
+
+Thank you for your support!
