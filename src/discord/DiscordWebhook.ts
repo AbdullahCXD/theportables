@@ -1,6 +1,6 @@
 import { WebhookClient } from 'discord.js';
 
-export function createDiscordWebhook(webhookUrl: string, message: string): void {
+export function createDiscordWebhook(webhookUrl: string): WebhookClient {
     const webhook = new WebhookClient({ url: webhookUrl });
-    webhook.send(message);
+    return webhook;
 }

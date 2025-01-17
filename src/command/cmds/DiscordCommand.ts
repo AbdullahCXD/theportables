@@ -69,7 +69,8 @@ export default class DiscordCommand extends Command {
         }
 
         try {
-            createDiscordWebhook(webhookUrl, message);
+            const webhook = createDiscordWebhook(webhookUrl);
+            await webhook.send(message);
             
             Logger.emptyLine();
             BoxRenderer.createBox('Discord Message Sent', [
