@@ -5,6 +5,7 @@ import { Command, CommandContext } from '../Command';
 import { FileSystem } from '../../utils/FileSystem';
 import clc from 'cli-color';
 import axios from 'axios';
+import { CommandBuilder } from '../CommandBuilder';
 
 interface ServerAction {
     description: string;
@@ -15,29 +16,53 @@ export default class ServerCommand extends Command {
     private readonly actions: Map<string, ServerAction> = new Map();
 
     constructor() {
-        super({
-            name: 'server',
-            description: 'Manage Minecraft servers',
-            category: 'Server',
-            aliases: ['s'],
-            usage: 'server <command> [options]',
-            examples: [
-                'server create myserver --port 25565 --version 1.19.2',
-                'server list',
-                'server start myserver',
-                'server stop myserver',
-                'server delete myserver',
-                'server rename myserver newname',
-                'server listen myserver',
-                'server ping mc.hypixel.net'
-            ],
-            options: [
-                { name: 'name', description: 'Name of the server', type: 'string' },
-                { name: 'port', description: 'Port number for the server', type: 'number' },
-                { name: 'version', description: 'Minecraft version for the server', type: 'string' },
-                { name: 'force', description: 'Force the operation without confirmation', type: 'boolean' }
-            ]
-        });
+        super(CommandBuilder.builder()
+            .setName('server')
+            .setDescription('Manage Minecraft servers')
+            .setCategory('Server')
+            .setAliases(['s'])
+            .setUsage('server <command> [options]')
+            .addArgument({
+                name: 'command',
+                description: 'The command to execute (create/list/start/stop/delete/rename/listen/edit/ping)',
+                type: 'string',
+                required: true
+            })
+            .addArgument({
+                name: 'newname',
+                description: 'New name for the server (rename only)',
+                type: 'string'
+            })
+            .addOption({
+                name: 'name',
+                description: 'Name of the server',
+                type: 'string'
+            })
+            .addOption({
+                name: 'port',
+                description: 'Port number for the server',
+                type: 'number'
+            })
+            .addOption({
+                name: 'version',
+                description: 'Minecraft version for the server',
+                type: 'string'
+            })
+            .addOption({
+                name: 'force',
+                description: 'Force the operation without confirmation',
+                type: 'boolean'
+            })
+            .addExample('server create --name myserver --port 25565 --version 1.19.2')
+            .addExample('server list')
+            .addExample('server start --name myserver')
+            .addExample('server stop --name myserver')
+            .addExample('server delete --name myserver')
+            .addExample('server rename --name myserver newname')
+            .addExample('server listen --name myserver')
+            .addExample('server ping mc.hypixel.net')
+            .build()
+        );
 
         // Initialize action handlers
         this.actions
@@ -81,7 +106,7 @@ export default class ServerCommand extends Command {
 
     protected async run(context: CommandContext): Promise<void> {
         const { args, flags } = context;
-        const subcommand = args[0]?.toLowerCase();
+        const subcommand = args.get('command')?.toLowerCase();
 
         if (!subcommand) {
             this.showServerHelp();
@@ -95,7 +120,8 @@ export default class ServerCommand extends Command {
             return;
         }
 
-        await action.handler(flags, args.slice(1));
+        const argsArray = Array.from(args.values());
+        await action.handler(flags, argsArray.slice(1));
     }
 
     private showServerHelp(): void {

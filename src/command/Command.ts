@@ -3,12 +3,21 @@ import { BoxRenderer } from '../utils/BoxRenderer';
 import clc from 'cli-color';
 
 export interface CommandContext {
-    args: string[];
+    args: Map<string, any>;
     flags: Map<string, string | boolean>;
     rawCommand: string;
+    rawArgs: string[];
 }
 
 export interface CommandOption {
+    name: string;
+    description: string;
+    type: 'string' | 'boolean' | 'number';
+    required?: boolean;
+    default?: any;
+}
+
+export interface CommandArgument {
     name: string;
     description: string;
     type: 'string' | 'boolean' | 'number';
@@ -23,6 +32,7 @@ export interface CommandDefinition {
     aliases?: string[];
     category?: string;
     options?: CommandOption[];
+    arguments?: CommandArgument[];
     examples?: string[];
 }
 
@@ -84,6 +94,40 @@ export abstract class Command {
         return true;
     }
 
+    protected validateArgs(args: string[]): boolean {
+        if (!this.definition.arguments) return true;
+
+        for (let i = 0; i < this.definition.arguments.length; i++) {
+            const argDef = this.definition.arguments[i];
+            const value = args[i];
+
+            if (argDef.required && value === undefined) {
+                Logger.error(`Missing required argument: ${argDef.name}`);
+                return false;
+            }
+
+            if (value !== undefined) {
+                if (argDef.type === 'number' && isNaN(Number(value))) {
+                    Logger.error(`Argument ${argDef.name} must be a number`);
+                    return false;
+                }
+                if (argDef.type === 'string' && typeof value !== 'string') {
+                    Logger.error(`Argument ${argDef.name} must be a string`);
+                    return false;
+                }
+                if (argDef.type === 'boolean') {
+                    const boolValue = value.toLowerCase();
+                    if (boolValue !== 'true' && boolValue !== 'false') {
+                        Logger.error(`Argument ${argDef.name} must be true or false`);
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
     protected showHelp(): void {
         const content: string[] = [
             `${clc.white(this.definition.name)} ${clc.blackBright(this.definition.aliases?.join(', ') || '')}`,
@@ -93,6 +137,16 @@ export abstract class Command {
 
         if (this.definition.usage) {
             content.push('', `${clc.blackBright('Usage:')} ${this.definition.usage}`);
+        }
+
+        if (this.definition.arguments?.length) {
+            content.push('', clc.blackBright('Arguments:'));
+            this.definition.arguments.forEach(arg => {
+                const required = arg.required ? ' (required)' : '';
+                const defaultValue = arg.default ? ` (default: ${arg.default})` : '';
+                content.push(`  ${arg.name} ${clc.blackBright(`<${arg.type}>${required}${defaultValue}`)}`);
+                content.push(`    ${arg.description}`);
+            });
         }
 
         if (this.definition.options?.length) {
@@ -125,15 +179,40 @@ export abstract class Command {
             return;
         }
 
-        if (!this.validateOptions(flags)) {
+        if (!this.validateOptions(flags) || !this.validateArgs(cleanArgs)) {
             this.showHelp();
             return;
         }
 
+        const parsedArgs = new Map<string, any>();
+        if (this.definition.arguments) {
+            this.definition.arguments.forEach((argDef, index) => {
+                let value = cleanArgs[index];
+                
+                if (value === undefined && argDef.default !== undefined) {
+                    value = argDef.default;
+                }
+
+                if (value !== undefined) {
+                    switch (argDef.type) {
+                        case 'number':
+                            parsedArgs.set(argDef.name, Number(value));
+                            break;
+                        case 'boolean':
+                            parsedArgs.set(argDef.name, value.toLowerCase() === 'true');
+                            break;
+                        default:
+                            parsedArgs.set(argDef.name, value);
+                    }
+                }
+            });
+        }
+
         const context: CommandContext = {
-            args: cleanArgs,
+            args: parsedArgs,
             flags,
-            rawCommand
+            rawCommand,
+            rawArgs: cleanArgs
         };
 
         await this.run(context);

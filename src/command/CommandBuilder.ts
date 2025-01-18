@@ -1,4 +1,4 @@
-import { CommandDefinition, CommandOption } from './Command';
+import { CommandArgument, CommandDefinition, CommandOption } from './Command';
 
 export class CommandBuilder {
 
@@ -38,6 +38,14 @@ export class CommandBuilder {
             this.definition.options = [];
         }
         this.definition.options.push(option);
+        return this;
+    }
+
+    public addArgument(argument: CommandArgument): CommandBuilder {
+        if (!this.definition.arguments) {
+            this.definition.arguments = [];
+        }
+        this.definition.arguments.push(argument);
         return this;
     }
 

@@ -2,41 +2,40 @@ import { Command, CommandContext } from '../Command';
 import { Logger } from '../../utils/Logger';
 import { BoxRenderer } from '../../utils/BoxRenderer';
 import { Server } from '../../server/Server';
+import { CommandBuilder } from '../CommandBuilder';
 import clc from 'cli-color';
 
 export default class LogsCommand extends Command {
     constructor() {
-        super({
-            name: 'logs',
-            description: 'View and manage application logs',
-            category: 'System',
-            aliases: ['log'],
-            usage: 'logs [command] [options]',
-            examples: [
-                'logs list',
-                'logs view --lines 50',
-                'logs clear',
-                'logs server myserver --lines 100'
-            ],
-            options: [
-                {
+        super(
+            new CommandBuilder()
+                .setName('logs')
+                .setDescription('View and manage application logs')
+                .setCategory('System')
+                .setAliases(['log'])
+                .setUsage('logs [command] [options]')
+                .addExample('logs list')
+                .addExample('logs view --lines 50')
+                .addExample('logs clear')
+                .addExample('logs server myserver --lines 100')
+                .addOption({
                     name: 'lines',
                     description: 'Number of lines to show',
                     type: 'number',
                     default: 50
-                },
-                {
+                })
+                .addOption({
                     name: 'server',
-                    description: 'Server name to view logs for',
+                    description: 'Server name to view logs for', 
                     type: 'string'
-                }
-            ]
-        });
+                })
+                .build()
+        );
     }
 
     protected async run(context: CommandContext): Promise<void> {
         const { args, flags } = context;
-        const subcommand = args[0];
+        const subcommand = args.get('command')?.toLowerCase();
 
         if (!subcommand) {
             this.showLogsHelp();
@@ -195,4 +194,4 @@ export default class LogsCommand extends Command {
         ]);
         Logger.emptyLine();
     }
-} 
+}

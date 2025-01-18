@@ -47,7 +47,7 @@ export default class ConfigCommand extends Command {
 
     protected async run(context: CommandContext): Promise<void> {
         const { args, flags } = context;
-        const subcommand = args[0]?.toLowerCase();
+        const subcommand = args.get('command')?.toLowerCase();
 
         const handlers: Record<string, () => Promise<void>> = {
             list: () => this.handleList(),

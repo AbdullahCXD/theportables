@@ -79,7 +79,6 @@ export class CommandManager {
             if (index > 0) content.push('');
             content.push(clc.yellow(category.toUpperCase()));
             
-            // Convert Set to Array and sort commands by name
             Array.from(commands)
                 .sort((a, b) => a.name.localeCompare(b.name))
                 .forEach(cmd => {
@@ -91,7 +90,10 @@ export class CommandManager {
                         ` ${clc.blackBright(`(${cmd.aliases.join(', ')})`)}`  : 
                         '';
 
-                    content.push(`  ${clc.white(cmd.name)}${aliases}`);
+                    const args = cmd.arguments?.map(arg => `<${arg.name}>`).join(' ') || '';
+                    const displayName = args ? `${cmd.name} ${args}` : cmd.name;
+
+                    content.push(`  ${clc.white(displayName)}${aliases}`);
                     content.push(`    ${description}`);
                     
                     if (cmd.usage) {

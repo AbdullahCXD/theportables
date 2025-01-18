@@ -7,44 +7,43 @@ import { FileSystem } from '../../utils/FileSystem';
 import path from 'path';
 import clc from 'cli-color';
 import fs from 'fs';
+import { CommandBuilder } from '../CommandBuilder';
 
 export default class InjectCommand extends Command {
     constructor() {
-        super({
-            name: 'inject',
-            description: 'Manage method injections',
-            category: 'Utility',
-            aliases: ['injection'],
-            usage: 'inject <command> [options]',
-            examples: [
-                'inject list',
-                'inject list Server.startServer',
-                'inject list Server.startServer myserver',
-                'inject clear',
-                'inject clear Server.startServer',
-                'inject clear Server.startServer myserver',
-                'inject register'
-            ],
-            options: [
-                {
+        super(
+            new CommandBuilder()
+                .setName('inject')
+                .setDescription('Manage method injections')
+                .setCategory('Utility')
+                .setAliases(['injection'])
+                .setUsage('inject <command> [options]')
+                .addExample('inject list')
+                .addExample('inject list Server.startServer')
+                .addExample('inject list Server.startServer myserver')
+                .addExample('inject clear')
+                .addExample('inject clear Server.startServer')
+                .addExample('inject clear Server.startServer myserver')
+                .addExample('inject register')
+                .addOption({
                     name: 'target',
                     description: 'Target method to manage injections for (e.g., Server.startServer)',
                     type: 'string'
-                },
-                {
+                })
+                .addOption({
                     name: 'id',
                     description: 'Instance ID (e.g., server name)',
                     type: 'string'
-                }
-            ]
-        });
+                })
+                .build()
+        );
     }
 
     protected async run(context: CommandContext): Promise<void> {
         const { args, flags } = context;
-        const subcommand = args[0]?.toLowerCase();
-        const target = flags.get('target') as string || args[1];
-        const id = flags.get('id') as string || args[2];
+        const subcommand = args.get('command')?.toLowerCase();
+        const target = flags.get('target') as string || args.get('target');
+        const id = flags.get('id') as string || args.get('id');
 
         switch (subcommand) {
             case 'list':

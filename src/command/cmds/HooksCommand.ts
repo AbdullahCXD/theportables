@@ -6,36 +6,35 @@ import { FileSystem } from '../../utils/FileSystem';
 import path from 'path';
 import clc from 'cli-color';
 import fs from 'fs';
+import { CommandBuilder } from '../CommandBuilder';
 
 export default class HooksCommand extends Command {
     constructor() {
-        super({
-            name: 'hooks',
-            description: 'Manage event hooks',
-            category: 'Utility',
-            aliases: ['hook'],
-            usage: 'hooks <command> [options]',
-            examples: [
-                'hooks list',
-                'hooks list server:playerJoin',
-                'hooks clear',
-                'hooks clear server:playerJoin',
-                'hooks register'
-            ],
-            options: [
-                {
+        super(
+            new CommandBuilder()
+                .setName('hooks')
+                .setDescription('Manage event hooks')
+                .setCategory('Utility')
+                .setAliases(['hook'])
+                .setUsage('hooks <command> [options]')
+                .addExample('hooks list')
+                .addExample('hooks list server:playerJoin')
+                .addExample('hooks clear')
+                .addExample('hooks clear server:playerJoin')
+                .addExample('hooks register')
+                .addOption({
                     name: 'event',
                     description: 'Event name to manage hooks for',
                     type: 'string'
-                }
-            ]
-        });
+                })
+                .build()
+        );
     }
 
     protected async run(context: CommandContext): Promise<void> {
         const { args, flags } = context;
-        const subcommand = args[0]?.toLowerCase();
-        const event = flags.get('event') as string || args[1];
+        const subcommand = args.get('command')?.toLowerCase();
+        const event = flags.get('event') as string || args.get('event');
 
         switch (subcommand) {
             case 'list':

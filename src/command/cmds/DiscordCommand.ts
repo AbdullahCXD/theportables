@@ -12,6 +12,14 @@ export default class DiscordCommand extends Command {
             category: 'Integration',
             aliases: ['dc'],
             usage: 'discord <command> [options]',
+            arguments: [
+                {
+                    name: 'command',
+                    description: 'The command to execute',
+                    type: 'string',
+                    required: true
+                }
+            ],
             examples: [
                 'discord webhook send "Hello from CLI!"',
                 'discord webhook send "Server starting..." --webhook https://discord.com/api/webhooks/...'
@@ -29,11 +37,11 @@ export default class DiscordCommand extends Command {
 
     protected async run(context: CommandContext): Promise<void> {
         const { args, flags } = context;
-        const subcommand = args[0]?.toLowerCase();
+        const subcommand = args.get('command')?.toLowerCase();
 
         switch (subcommand) {
             case 'webhook':
-                await this.handleWebhook(args.slice(1), flags);
+                await this.handleWebhook(subcommand.slice(1), flags);
                 break;
             default:
                 this.showHelp();

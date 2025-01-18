@@ -1,27 +1,26 @@
 import { Command, CommandContext } from '../Command';
 import { CommandManager } from '../CommandManager';
+import { CommandBuilder } from '../CommandBuilder';
 
 export default class HelpCommand extends Command {
     constructor() {
-        super({
-            name: 'help',
-            description: 'Shows a list of available commands or detailed help for a specific command',
-            usage: 'help [command]',
-            aliases: ['?', 'h'],
-            category: 'General',
-            examples: [
-                'help',
-                'help server',
-                'help --all'
-            ],
-            options: [
-                {
+        super(
+            new CommandBuilder()
+                .setName('help')
+                .setDescription('Shows a list of available commands or detailed help for a specific command')
+                .setUsage('help [command]')
+                .setAliases(['?', 'h'])
+                .setCategory('General')
+                .addExample('help')
+                .addExample('help server')
+                .addExample('help --all')
+                .addOption({
                     name: 'all',
                     description: 'Show detailed help for all commands',
                     type: 'boolean'
-                }
-            ]
-        });
+                })
+                .build()
+        );
     }
 
     protected async run(context: CommandContext): Promise<void> {
@@ -33,9 +32,9 @@ export default class HelpCommand extends Command {
             return;
         }
 
-        if (args.length > 0) {
+        if (args.size > 0) {
             // Show help for specific command
-            const commandName = args[0];
+            const commandName = args.get('command');
             const command = CommandManager['resolveCommand'](commandName);
             
             if (command) {
@@ -49,4 +48,3 @@ export default class HelpCommand extends Command {
         }
     }
 }
-  

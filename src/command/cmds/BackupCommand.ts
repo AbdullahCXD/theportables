@@ -3,50 +3,54 @@ import { Logger } from '../../utils/Logger';
 import { BoxRenderer } from '../../utils/BoxRenderer';
 import { BackupManager } from '../../utils/BackupManager';
 import clc from 'cli-color';
+import { CommandBuilder } from '../CommandBuilder';
 
 export default class BackupCommand extends Command {
     constructor() {
-        super({
-            name: 'backup',
-            description: 'Manage server backups',
-            category: 'Server',
-            aliases: ['bak'],
-            usage: 'backup <command> [options]',
-            examples: [
-                'backup create --server myserver --name custom-backup',
-                'backup list --server myserver',
-                'backup restore --server myserver --backup latest --force',
-                'backup delete --server myserver --backup old-backup --force'
-            ],
-            options: [
-                {
-                    name: 'server',
-                    description: 'Name of the server',
-                    type: 'string',
-                    required: true
-                },
-                {
-                    name: 'backup',
-                    description: 'Name of the backup',
-                    type: 'string'
-                },
-                {
-                    name: 'name',
-                    description: 'Custom name for the backup (create only)',
-                    type: 'string'
-                },
-                {
-                    name: 'force',
-                    description: 'Force the operation without confirmation',
-                    type: 'boolean'
-                }
-            ]
-        });
+        super(CommandBuilder.builder()
+            .setName('backup')
+            .setDescription('Manage server backups')
+            .setCategory('Server')
+            .setAliases(['bak'])
+            .setUsage('backup <command> [options]')
+            .addArgument({
+                name: 'command',
+                description: 'The command to execute (create/list/restore/delete)',
+                type: 'string',
+                required: true
+            })
+            .addOption({
+                name: 'server',
+                description: 'Name of the server',
+                type: 'string',
+                required: true
+            })
+            .addOption({
+                name: 'backup',
+                description: 'Name of the backup',
+                type: 'string'
+            })
+            .addOption({
+                name: 'name',
+                description: 'Custom name for the backup (create only)',
+                type: 'string'
+            })
+            .addOption({
+                name: 'force',
+                description: 'Force the operation without confirmation',
+                type: 'boolean'
+            })
+            .addExample('backup create --server myserver --name custom-backup')
+            .addExample('backup list --server myserver')
+            .addExample('backup restore --server myserver --backup latest --force')
+            .addExample('backup delete --server myserver --backup old-backup --force')
+            .build()
+        );
     }
 
     protected async run(context: CommandContext): Promise<void> {
         const { args, flags } = context;
-        const subcommand = args[0]?.toLowerCase();
+        const subcommand = args.get('command')?.toLowerCase();
         const serverName = flags.get('server') as string;
 
         if (!subcommand || !serverName) {
